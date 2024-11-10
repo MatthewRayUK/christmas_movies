@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container pt-5">
+<h1>Your Current Watchlist</h1>
+{% if user %}
+  <p>Welcome, {{ user.name }}!</p>  <!-- Display user's name if logged in -->
+{% else %}
+  <p>Welcome, Guest!</p>  <!-- Optional: show a guest message if no user is logged in -->
+{% endif %}</div>
+{% endblock %}>
