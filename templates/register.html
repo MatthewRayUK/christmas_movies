@@ -1,14 +1,40 @@
-{% extends "base.html" %} {% block content %}
-<div class="container">
-    <h3>Register</h3>
-{% with messages = get_flashed_messages() %} {% if messages %} {% for message in messages %}
-{{ message }}
-{% endfor %} {% endif %} {% endwith %}
- <form action="{{ url_for('register') }}" method="post">
-    	<input type="text" name="name" placeholder="Name" required="required" />
-		<input type="email" name="email" placeholder="Email" required="required" />
-        <input type="password" name="password" placeholder="Password" required="required" />
-        <button type="submit" class="btn btn-primary btn-block btn-large">Sign me up.</button>
-    </form>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h3 class="text-center mb-4">Register</h3>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-info">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form action="{{ url_for('register') }}" method="post" class="card p-4 shadow-sm">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" name="name" id="name" class="form-control" placeholder="Your full name" required="required" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" name="email" id="email" class="form-control" placeholder="Your email address" required="required" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Choose a password" required="required" />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block w-100">Sign me up</button>
+            </form>
+        </div>
     </div>
+</div>
 {% endblock %}
