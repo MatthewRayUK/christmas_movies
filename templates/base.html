@@ -40,11 +40,12 @@
                 {% if not current_user.is_authenticated %}
                 <!-- Show Login link only if the user is not logged in -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('register') }}">Register</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                </li>
+
                 {% else %}
                 <!-- Optionally, you can show the user's name or a logout link here -->
                 <li class="nav-item">
