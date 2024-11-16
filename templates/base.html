@@ -19,6 +19,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
+
         <div class="collapse navbar-collapse" id="navbarsExample02">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
@@ -26,14 +27,18 @@
                        style="cursor: pointer;">Home</a>
                 </li>
 
-
+                {% if current_user.name == "Matthew Ray" %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('builder')  }}" contenteditable="false"
+                    <a class="nav-link" href="{{ url_for('packbuilder') }}">Admin Builder</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('user_search')  }}" contenteditable="false"
                        style="cursor: pointer;">Search</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" contenteditable="false" style="cursor: pointer;">Packs</a>
-                </li>
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link" href="#" contenteditable="false" style="cursor: pointer;">Packs</a>-->
+<!--                </li>-->
                 <!-- LOGIN link apprear or not -->
 
 
@@ -52,6 +57,8 @@
                     <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                 </li>
                 {% endif %}
+
+
             </ul>
         </div>
     </div>

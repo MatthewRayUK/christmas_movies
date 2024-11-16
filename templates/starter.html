@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="text-center pt-3 text-success">Movie List</h2>
+<h4 class="text-center pt-2">Select 24 films to build your own list</h4>
+
+<div class="row px-5 py-5">
+{% for movie in database %}
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+        <div class="card border-info" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="card-body" style="padding: 0.5; text-align: center;">
+                <h3 class="card-title mt-2">{{ loop.index }} | {{ movie.title }}</h3> <!-- Use loop.index to get the current iteration -->
+                <img src="https://image.tmdb.org/t/p/original{{ movie.image_url }}" alt="Movie Image" style="width: 45%; margin: auto;">
+                <div class="mt-auto">
+                    <button type="button" class="btn btn-outline-info my-2">Select Movie</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+</div>
+
+{% endblock %}

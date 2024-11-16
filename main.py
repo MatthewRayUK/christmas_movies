@@ -6,23 +6,10 @@ from wtforms import StringField, SubmitField, URLField, TimeField, SelectField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import declarative_base, Mapped
-from sqlalchemy import Column, Integer, Float, String, Text
+from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, text
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
-
-
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
-
-
-# from datetime import date
-# from flask_bootstrap import Bootstrap5
-# from flask_ckeditor import CKEditor
-# from flask_gravatar import Gravatar
-# from flask_sqlalchemy import SQLAlchemy
-
-# from sqlalchemy import Integer, String, Text
-# from functools import wraps
-# from sqlalchemy.orm import relationship
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -35,7 +22,6 @@ api_key = "b6f038e5338cf8fbc1f28e2caf556c96"
 # Configure Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -58,6 +44,8 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(100), unique=True)
     password: Mapped[str] = mapped_column(String(100))
     name: Mapped[str] = mapped_column(String(100))
+    # Relationship
+    watchlist = relationship("Watchlist", back_populates="user")
 
 
 # Movie DB
@@ -66,10 +54,22 @@ class Movie(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(Text, nullable=False)
     img_url: Mapped[str] = mapped_column(Text, nullable=False)
-    year: Mapped[int] = mapped_column(Text, nullable=False)
+    year: Mapped[int] = mapped_column(Integer, nullable=False)
 
-# Need a watchilst table
+    watchlist = relationship("Watchlist", back_populates="movie")
 
+
+class Watchlist(db.Model):
+    __tablename__ = "watchlist"
+    movie_id: Mapped[int] = mapped_column(Integer, ForeignKey("movies.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), primary_key=True)
+    category: Mapped[str] = mapped_column(Text, nullable=False)
+    image_url: Mapped[str] = mapped_column(Text, nullable=False)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Relationships to User and Movie
+    user = relationship("User", back_populates="watchlist")
+    movie = relationship("Movie", back_populates="watchlist")
 
 with app.app_context():
     db.create_all()
@@ -80,44 +80,62 @@ class builder_search(FlaskForm):
     search = StringField('Type the name of a movie', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+class pack_builder_search(FlaskForm):
+    search = StringField('Type the name of a movie', validators=[DataRequired()])
+    category = SelectField('Category', choices=[('', 'Click here to select a category'), ('starter', 'Starter'), ('90s', '90s')])
+    submit = SubmitField('Submit')
+
 @app.route('/', methods=["GET", "POST"])
 def home():
     form = builder_search()
     if current_user.is_authenticated:
         user = current_user  # Get the currently logged-in user
+        movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
+            Watchlist.user_id == current_user.id).all()
+        movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title} for movie_id, image_url, title in
+                      movies]
+        return render_template("index.html", form=form, user=user, database=movie_data)
     else:
         user = None  # No user is logged in
+    # add_title_column()
+
+
+
+
     return render_template("index.html", form=form, user=user)
 
-@app.route ('/builder',methods=["GET", "POST"])
-def builder():
+
+
+
+# Need to add url somehow - maybe add to db when admin searches?
+@app.route('/starter')
+def starter():
+
+    movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
+            Watchlist.category == 'starter').all()
+    movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title} for movie_id, image_url, title in movies]
+    return render_template("starter.html", database=movie_data)
+
+
+
+@app.route ('/user_search',methods=["GET", "POST"])
+def user_search():
     form = builder_search()
     if form.validate_on_submit():
         results = form.search.data
-        return redirect(url_for("builder_results", data=results))
-    return render_template('builder.html', form=form)
+        print(results)
+        return redirect(url_for("user_search_results", data=results))
+    return render_template('user_search.html', form=form)
 
 
-@app.route ('/builder_results',methods=["GET", "POST"])
-def builder_results():
+@app.route ('/user_search_results',methods=["GET", "POST"])
+def user_search_results():
     search = request.args.get('data')
     url = f"https://api.themoviedb.org/3/search/movie?query={search}&api_key={api_key}"
     response = requests.get(url)
     data = response.json()
 
-
-    # ids = [x['id'] for x in data['results']]
-    # titles = [x['original_title'] for x in data['results']]
-    # image_urls = [f"https://image.tmdb.org/t/p/original/{x['poster_path']}" for x in data['results']]
-
-    #
-    #
-    # image_path = data['results'][0]['poster_path']
-    # id = data['results'][0]['id']
-    # title = data['results'][0]['original_title']
-    # image_url = f"https://image.tmdb.org/t/p/original/{image_path}"
-
-    return render_template('builder_results.html', data=data)
+    return render_template('user_search_results.html', data=data)
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
@@ -139,7 +157,11 @@ def register():
 
             db.session.add(new_user)
             db.session.commit()
-            return render_template("index.html")
+
+            login_user(new_user)
+
+
+            return redirect(url_for('home'))
         except:
             flash("Sorry, email already registered")
 
@@ -172,9 +194,63 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route('/add_movie')
-def add_movie():
-    pass
+@app.route('/add_movie/<int:movie_id>')
+def add_movie(movie_id):
+    print(movie_id)
+    add_to_watchlist(current_user.id, movie_id)
+    return redirect(url_for('home'))
+
+@app.route('/packbuilder', methods=["GET", "POST"])
+def packbuilder():
+    form = pack_builder_search()
+    if form.validate_on_submit():
+        results = form.search.data
+        category = form.category.data
+        return redirect(url_for("pack_builder_results", data=results, category=category))
+    return render_template("packbuilder.html", form=form)
+
+
+# Pack builder - admins
+@app.route('/pack_builder_results', methods=["GET", "POST"])
+def pack_builder_results():
+    search = request.args.get('data')
+    category = request.args.get('category')
+
+    url = f"https://api.themoviedb.org/3/search/movie?query={search}&api_key={api_key}"
+    response = requests.get(url)
+    data = response.json()
+
+
+    return render_template('packbuilder_results.html', data=data, category=category)
+
+@app.route('/admin_add/<int:movie_id>')
+def admin_add(movie_id):
+    user_id = current_user.id  # or use your method of getting the current user's ID
+    add_to_watchlist(user_id, movie_id)
+
+    return redirect(url_for('packbuilder'))
+
+def add_to_watchlist(user_id, movie_id, *category):
+
+    if user_id == 1:
+        category = 'starter'
+    else:
+        category = 'user'
+
+    response = requests.get(f'https://api.themoviedb.org/3/movie/{movie_id}', params={'api_key': api_key})
+    title = response.json().get('original_title')
+    image_url = response.json().get('poster_path')
+
+    watchlist_entry = Watchlist(user_id=user_id, movie_id=movie_id, category=category, image_url = image_url, title=title)
+    db.session.add(watchlist_entry)
+    db.session.commit()
+
+def add_title_column():
+    with app.app_context():  # Ensures you're within the app context when modifying the DB
+        # Execute raw SQL to add the 'title' column
+        db.session.execute(text('ALTER TABLE watchlist ADD COLUMN title VARCHAR(255);'))
+        db.session.commit()
+
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=True)

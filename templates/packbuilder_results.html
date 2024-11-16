@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% extends "base.html" %}
+{% block content %}
+
+<h2 class="text-center pt-3 text-success">Search Results</h2>
+
+<div class="row px-5 py-5">
+    {% for x in data["results"] %}
+       <div class="col-lg-3 col-md-4 col-sm-6 mb-4"> <!-- Added mb-4 for spacing -->
+            <div class="card border-info" style="height: 100%; display: flex; flex-direction: column;"> <!-- Make the card height flexible -->
+                <div class="card-body" style="padding: 0.5; text-align: center;"> <!-- Remove default padding and center text -->
+                   <a href="{{ url_for('admin_add', movie_id=x['id']) }}">  <img src="https://image.tmdb.org/t/p/original{{ x['poster_path'] }}"
+                         alt="{{ x['original_title'] }} Poster"
+                         style="width: 45%;  margin: auto;">
+                    <h5 class="card-title mt-2">{{ x['original_title'] }}</h5> <!-- Centered title with margin -->
+                    <div class="mt-auto"> <!-- Pushes button to the bottom -->
+                        <button type="button" class="btn btn-outline-info  my-2">Select Movie</button>    </a><!-- Full width button with vertical margin -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endfor %}
+</div>
+
+
+{% endblock %}>
+
+</title>
+</head>
+<body>
+
+</body>
+</html>

@@ -8,7 +8,7 @@
        <div class="col-lg-3 col-md-4 col-sm-6 mb-4"> <!-- Added mb-4 for spacing -->
             <div class="card border-info" style="height: 100%; display: flex; flex-direction: column;"> <!-- Make the card height flexible -->
                 <div class="card-body" style="padding: 0.5; text-align: center;"> <!-- Remove default padding and center text -->
-                   <a href="{{ url_for('add_movie', id=x['id']) }}">  <img src="https://image.tmdb.org/t/p/original{{ x['poster_path'] }}"
+                   <a href="{{ url_for('add_movie', movie_id=x['id']) }}">  <img src="https://image.tmdb.org/t/p/original{{ x['poster_path'] }}"
                          alt="{{ x['original_title'] }} Poster"
                          style="width: 45%;  margin: auto;">
                     <h5 class="card-title mt-2">{{ x['original_title'] }}</h5> <!-- Centered title with margin -->
