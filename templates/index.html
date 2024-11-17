@@ -1,38 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container pt-5">
-<h1>Your Current Watchlist</h1>
-{% if user %}
-  <p>Welcome, {{ user.name }}!</p>  <!-- Display user's name if logged in -->
-    <a href="{{ url_for('starter') }}">Click here to view 100 Christmas Films</a>
+    {% if user %}
+    <h2>Welcome, {{ user.name }}, your watchlist currently contains {{ count }}/24 films.</h2>
+    <h4>Use the search function to add films.</h4>
 
-{% else %}
-  <p>Welcome, Guest!</p>  <!-- Optional: show a guest message if no user is logged in -->
-{% endif %}
+    <a href="{{ url_for('starter') }}">Or click here to view IMDBs Top 100 Christmas Films</a>
+    {% else %}
+    <p>Welcome, Guest!</p>
+    {% endif %}
 
-<div class="container">
-    <div class="row"> <!-- Bootstrap row to group items -->
-        {% for movie in database %}
+    <div class="container">
+        <div class="row">
+            {% for movie in database %}
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="card border-info" style="height: 100%; display: flex; flex-direction: column;">
                     <div class="card-body" style="padding: 0.5rem; text-align: center;">
-                        <!-- Title with smaller font size -->
-                        <h3 class="card-title mt-2" style="font-size: 1.25rem;">{{ loop.index }} | {{ movie.title }}</h3>
-
-                        <!-- Image with original width -->
+                        <h3 class="card-title mt-2" style="font-size: 1.25rem;">{{ loop.index }} | {{ movie.title
+                            }}</h3>
                         <img src="https://image.tmdb.org/t/p/original{{ movie.image_url }}"
                              alt="Movie Image"
                              style="width: 45%; margin: auto;">
-
                         <div class="mt-auto">
                             <p>Watched and rating system coming soon!</p>
                         </div>
                     </div>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
-</div>
 
 </div>
 {% endblock %}

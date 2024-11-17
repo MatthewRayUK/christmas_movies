@@ -5,20 +5,30 @@
 <h4 class="text-center pt-2">Select 24 films to build your own list</h4>
 
 <div class="row px-5 py-5">
-{% for movie in database %}
-    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-        <div class="card border-info" style="height: 100%; display: flex; flex-direction: column;">
-            <div class="card-body" style="padding: 0.5; text-align: center;">
-                <h3 class="card-title mt-2">{{ loop.index }} | {{ movie.title }}</h3> <!-- Use loop.index to get the current iteration -->
-                <img src="https://image.tmdb.org/t/p/original{{ movie.image_url }}" alt="Movie Image" style="width: 45%; margin: auto;">
-                <div class="mt-auto">
-                    <button type="button" class="btn btn-outline-info my-2">Select Movie</button>
+    {% for movie in database %}
+    <div class="col-lg-2 col-md-4 col-sm-6 mb-4"> <!-- Added mb-4 for spacing -->
+        <div class="card border-info" style="height: 100%; display: flex; flex-direction: column;"> <!-- Make the card height flexible -->
+            <div class="card-body" style="padding: 0.5; text-align: center;"> <!-- Remove default padding and center text -->
+                               <h4 class="card-title mt-1">{{ loop.index }} | {{ movie.title }}</h4>
+
+                <a href="{{ url_for('add_movie', movie_id=movie.movie_id) }}">
+                    <img src="https://image.tmdb.org/t/p/original{{ movie.image_url }}"
+                         alt="Movie Image"
+                         style="width: 45%; margin: auto;">
+                </a>
+
+
+                <div class="mt-auto"> <!-- Pushes button to the bottom -->
+                    {% if movie.movie_id in user_watchlist %}
+                        <a  type="button" class="btn btn-success my-2">✓ Already in Watchlist</a>
+                    {% else %}
+                      <a href="{{ url_for('add_movie', movie_id=movie.movie_id) }}"> <button  type="button" class="btn btn-outline-info my-2">Select Movie</button></a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-{% endfor %}
-
+    {% endfor %}
 </div>
 
 {% endblock %}

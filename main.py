@@ -66,6 +66,7 @@ class Watchlist(db.Model):
     category: Mapped[str] = mapped_column(Text, nullable=False)
     image_url: Mapped[str] = mapped_column(Text, nullable=False)
     title: Mapped[str] = mapped_column(Text, nullable=False)
+    user_rating: Mapped[int] = mapped_column(Integer, nullable=True)
 
     # Relationships to User and Movie
     user = relationship("User", back_populates="watchlist")
@@ -94,7 +95,8 @@ def home():
             Watchlist.user_id == current_user.id).all()
         movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title} for movie_id, image_url, title in
                       movies]
-        return render_template("index.html", form=form, user=user, database=movie_data)
+        count= len(movie_data)
+        return render_template("index.html", form=form, user=user, database=movie_data, count=count)
     else:
         user = None  # No user is logged in
     # add_title_column()
@@ -113,8 +115,12 @@ def starter():
 
     movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
             Watchlist.category == 'starter').all()
+    user_watchlist = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
+            Watchlist.user_id == current_user.id).all()
+    user_watchlist_ids = [movie.movie_id for movie in user_watchlist]
+
     movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title} for movie_id, image_url, title in movies]
-    return render_template("starter.html", database=movie_data)
+    return render_template("starter.html", database=movie_data, user_watchlist=user_watchlist_ids)
 
 
 
@@ -241,16 +247,16 @@ def add_to_watchlist(user_id, movie_id, *category):
     title = response.json().get('original_title')
     image_url = response.json().get('poster_path')
 
-    watchlist_entry = Watchlist(user_id=user_id, movie_id=movie_id, category=category, image_url = image_url, title=title)
+    watchlist_entry = Watchlist(user_id=user_id, movie_id=movie_id, category=category, image_url = image_url, title=title, user_rating=0)
     db.session.add(watchlist_entry)
     db.session.commit()
 
-def add_title_column():
-    with app.app_context():  # Ensures you're within the app context when modifying the DB
-        # Execute raw SQL to add the 'title' column
-        db.session.execute(text('ALTER TABLE watchlist ADD COLUMN title VARCHAR(255);'))
-        db.session.commit()
+# def add_title_column():
+#     with app.app_context():  # Ensures you're within the app context when modifying the DB
+#         # Execute raw SQL to add the 'title' column
+#         db.session.execute(text('ALTER TABLE watchlist ADD COLUMN user_rating INTEGER;'))
+#         db.session.commit()
 
-
+print(app.config['SQLALCHEMY_DATABASE_URI'])
 if __name__ == "__main__":
     app.run(debug=True)
