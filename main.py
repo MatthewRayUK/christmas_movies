@@ -100,16 +100,9 @@ def home():
     else:
         user = None  # No user is logged in
     # add_title_column()
-
-
-
-
     return render_template("index.html", form=form, user=user)
 
 
-
-
-# Need to add url somehow - maybe add to db when admin searches?
 @app.route('/starter')
 def starter():
 
@@ -257,6 +250,5 @@ def add_to_watchlist(user_id, movie_id, *category):
 #         db.session.execute(text('ALTER TABLE watchlist ADD COLUMN user_rating INTEGER;'))
 #         db.session.commit()
 
-print(app.config['SQLALCHEMY_DATABASE_URI'])
 if __name__ == "__main__":
     app.run(debug=True)

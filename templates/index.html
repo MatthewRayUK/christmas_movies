@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container pt-5">
+
+
+  <div class="container py-2 row">
+        <div class="card text-white bg-primary mb-3" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="card-body" style="padding: 0.5rem; text-align: center;">
     {% if user %}
     <h2>Welcome, {{ user.name }}, your watchlist currently contains {{ count }}/24 films.</h2>
     <h4>Use the search function to add films.</h4>
@@ -8,7 +13,23 @@
     <a href="{{ url_for('starter') }}">Or click here to view IMDBs Top 100 Christmas Films</a>
     {% else %}
     <p>Welcome, Guest!</p>
-    {% endif %}
+    {% endif %}            </div>
+        </div>
+    </div>
+
+
+    <div class="container row">
+        <div class="card border-primary  card-body text-primary mb-3" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="card-body" style="padding: 0.5rem;">
+                <h2>Project Updates</h2>
+
+                <h4>Coming Soon:</h4>
+                <ul>
+                    <li>Remove from list button</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <div class="row">
@@ -32,4 +53,5 @@
     </div>
 
 </div>
+
 {% endblock %}
