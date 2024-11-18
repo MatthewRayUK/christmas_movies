@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <div class="row py-4">
+        <!-- About Me Section -->
+        <div class="col-12 mb-4">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title">About Me</h3>
+                </div>
+                <div class="card-body text-dark">
+                    <p class="card-text">
+                        I started learning Python about 18 months ago, and right from the start, I knew this
+                        was something I was going to enjoy. After 13 years as a primary school teacher, I had never explored
+                        what the tech industry had to offer. Little did I know how much I would love the process of learning to
+                        code!
+
+                        In April this year, I made the leap and left teaching to pursue a career as a Data Analyst, which I
+                        absolutely love. With more free time than I’ve ever had in my adult life (if you think teachers work
+                        9-3, please, please talk to a teacher!), I’ve been able to dive deeper into coding. While I’m not sure
+                        exactly where this journey will take me, I’m enjoying every step of the way.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- About This Project Section -->
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title">About This Project</h3>
+                </div>
+                <div class="card-body text-dark">
+                    <p class="card-text">
+                        We all love Christmas, don’t we? In my family, my sister and I are particularly obsessed. So, we wanted
+                        a fun way to track the movies we want to watch during December—ideally one each day as we count down to
+                        Christmas.
+
+                        As I learned more about APIs and Flask, I started brainstorming how to structure this idea and began
+                        putting together a few pages. Below, I’ll outline the development of this project and will continue to
+                        update it as I make progress.
+                    </p>
+                    <ul>
+                        <li><strong>Choosing Libraries:</strong> I began by selecting the libraries that would support me in Python. Flask is the main framework I’m using, alongside SQLAlchemy for database management, Flask-Bootstrap to help with HTML & CSS styling, and Flask-WTF to make handling forms a lot easier.</li>
+                        <li><strong>Setting Up Databases & Pages:</strong> The setup of the database and basic pages/navigation was straightforward, though I had to dive into Jinja (Flask’s templating engine) to embed Python code within my HTML documents.</li>
+                        <li><strong>API Integration:</strong> TheMovieDB API was the perfect resource for retrieving movie information. I set up an account and integrated it to allow users to search for films and fetch their details for the watchlist.</li>
+                        <li><strong>User Management:</strong> One of the most fun and educational parts of this project was learning about password security. I loved diving into hashing and salting passwords to keep user data safe, and I’ve implemented this securely within the app.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -102,7 +102,9 @@ def home():
     # add_title_column()
     return render_template("index.html", form=form, user=user)
 
-
+@app.route('/about', methods=["GET", "POST"])
+def about():
+    return render_template('about.html')
 @app.route('/starter')
 def starter():
 
@@ -251,4 +253,4 @@ def add_to_watchlist(user_id, movie_id, *category):
 #         db.session.commit()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

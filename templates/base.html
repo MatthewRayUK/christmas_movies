@@ -27,23 +27,21 @@
                        style="cursor: pointer;">Home</a>
                 </li>
 
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('about')  }}"
+                       contenteditable="false"
+                       style="cursor: pointer;">About This Project</a>
+                </li>
+
                 {% if current_user.name == "Matthew Ray" %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('packbuilder') }}">Admin Builder</a>
                 </li>
                 {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('user_search')  }}" contenteditable="false"
-                       style="cursor: pointer;">Search</a>
-<!--                </li>-->
-<!--                <li class="nav-item">-->
-<!--                    <a class="nav-link" href="#" contenteditable="false" style="cursor: pointer;">Packs</a>-->
-<!--                </li>-->
-                <!-- LOGIN link apprear or not -->
 
 
                 {% if not current_user.is_authenticated %}
-                <!-- Show Login link only if the user is not logged in -->
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('register') }}">Register</a>
                 </li>
@@ -52,7 +50,9 @@
                 </li>
 
                 {% else %}
-                <!-- Optionally, you can show the user's name or a logout link here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('user_search')  }}" contenteditable="false"
+                       style="cursor: pointer;">Search</a>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                 </li>
