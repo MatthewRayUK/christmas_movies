@@ -91,9 +91,9 @@ def home():
     form = builder_search()
     if current_user.is_authenticated:
         user = current_user  # Get the currently logged-in user
-        movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
+        movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title, Watchlist.user_rating).filter(
             Watchlist.user_id == current_user.id).all()
-        movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title} for movie_id, image_url, title in
+        movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title, "rating": user_rating} for movie_id, image_url, title, user_rating in
                       movies]
         count= len(movie_data)
         return render_template("index.html", form=form, user=user, database=movie_data, count=count)
@@ -105,9 +105,37 @@ def home():
 @app.route('/about', methods=["GET", "POST"])
 def about():
     return render_template('about.html')
+
+
+@app.route('/update_rating', methods=['POST'])
+def update_rating():
+    movie_id = request.form.get('movie_id')
+    new_rating = request.form.get('rating')
+    print(f"M:{movie_id}  NR:{new_rating}")
+
+    if movie_id and new_rating:
+        print("part 1")
+        # Find the existing Watchlist entry for the current user and movie
+        watchlist_entry = Watchlist.query.filter_by(user_id=current_user.id, movie_id=movie_id).first()
+
+        if watchlist_entry:
+            print("part 2")
+            # Update the user rating for the movie
+            watchlist_entry.user_rating = int(new_rating)  # Set the new rating here
+
+            # Commit the changes to the database
+            db.session.commit()
+
+            # Flash a success message
+            flash(f"Your rating for the movie was updated to {new_rating} stars.", "success")
+        else:
+            flash("Could not find the movie in your watchlist.", "danger")
+
+    return redirect(request.referrer or url_for('home'))
+
+
 @app.route('/starter')
 def starter():
-
     movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
             Watchlist.category == 'starter').all()
     user_watchlist = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(

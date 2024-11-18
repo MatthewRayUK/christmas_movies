@@ -1,16 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container pt-5">
-
-
-    <div class=" py-2 row">
+    <!-- Welcome Section -->
+    <div class="py-2 row">
         <div class="card text-white bg-danger mb-3" style="height: 100%; display: flex; flex-direction: column;">
             <div class="card-body" style="padding: 0.5rem; text-align: center;">
                 {% if user %}
                 <h2>Welcome, {{ user.name }}, your watchlist currently contains {{ count }}/24 films.</h2>
                 <h4>Use the search function to add films.</h4>
-
-                <a href="{{ url_for('starter') }}" class="text-black">Or click here to view IMDBs Top 100 Christmas
+                <a href="{{ url_for('starter') }}" class="text-black">Or click here to view IMDB's Top 100 Christmas
                     Films</a>
                 {% else %}
                 <h2>Welcome, Guest!</h2>
@@ -20,44 +18,90 @@
         </div>
     </div>
 
-
-<div class="row">
-    <div class="card border-primary card-body text-primary mb-3"
-         style="height: 100%; display: flex; flex-direction: column; padding: 0.5rem;">
-        <div class="card-body" style="padding: 0.25rem;">
-            <h4 class="pt-2">Coming Soon:</h4>
-            <ul>
-                <li>Remove from list button</li>
-                <li>Packs - collections of films based around themes e.g. 90's/animated</li>
-                <li>Rating system (which will then show an average rating)</li>
-                <li>Netflix/Disney/Prime icons to show where movies are streaming</li>
-            </ul>
+    <!-- Coming Soon Section -->
+    <div class="row">
+        <div class="card border-primary card-body text-primary mb-3" style="height: 100%; padding: 0.5rem;">
+            <div class="card-body" style="padding: 0.25rem;">
+                <h4 class="pt-2">Coming Soon:</h4>
+                <ul>
+                    <li>Remove from list button</li>
+                    <li>Packs - collections of films based around themes (e.g. 90's/animated)</li>
+                    <li>Rating system (which will show an average rating)</li>
+                    <li>Netflix/Disney/Prime icons to show where movies are streaming</li>
+                </ul>
+            </div>
         </div>
     </div>
-</div>
 
-    <div>
-        <div class="row">
-            {% for movie in database %}
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="card border-info" style="height: 100%; display: flex; flex-direction: column;">
-                    <div class="card-body" style="padding: 0.5rem; text-align: center;">
-                        <h3 class="card-title mt-2" style="font-size: 1.25rem;">{{ loop.index }} | {{ movie.title
-                            }}</h3>
-                        <img src="https://image.tmdb.org/t/p/original{{ movie.image_url }}"
-                             alt="Movie Image"
-                             style="width: 45%; margin: auto;">
-                        <div class="mt-auto">
-                            <p>Watched and rating system coming soon!</p>
+    <!-- Movie Grid Section -->
+    <div class="row">
+        {% for movie in database %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card border-info" style="display: flex; flex-direction: column; height: 100%;">
+                <div class="card-body" style="padding: 0.5rem; text-align: center;">
+                    <!-- Movie Title -->
+                    <h3 class="card-title mt-2" style="font-size: 1.25rem;">
+                        {{ loop.index }} | {{ movie.title }}
+                    </h3>
+
+                    <!-- Movie Image -->
+                    <img src="https://image.tmdb.org/t/p/original{{ movie.image_url }}" alt="Movie Image"
+                         class="img-fluid" style="width: 45%; margin: auto;">
+
+
+                    {% if movie.rating ==0 %}
+                    <p class="text-danger">◆ Not Rated ◆</p>
+                    <form action="{{ url_for('update_rating') }}" method="POST" class="mt-2">
+                        <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
+                        <div class="d-flex justify-content-center align-items-center text-center">
+                            <label for="rating-{{ movie.movie_id }}" class="mb-0 me-2" style="display: inline;">
+                                Add Rating:</label>
+                           <select name="rating" id="rating-{{ movie.movie_id }}" required class="form-select form-select-sm w-auto">
+    {% for i in range(1, 6) %}
+        <option value="{{ i }}"
+            {% if movie.rating == 0 and i == 5 or movie.rating == i %}selected{% endif %}>
+            {{ i }}
+        </option>
+    {% endfor %}
+</select>
+                            <button type="submit" class="btn btn-sm btn-danger ms-2">Add Rating</button>
                         </div>
+                    </form>
+                    {% else %}
+                    <!-- Movie Rating -->
+                    <div class="mt-auto text-danger">
+                        {% for x in range(movie.rating) %}
+                        ★
+                        {% endfor %}
+                        {% for x in range(5 - movie.rating) %}
+                        ☆
+                        {% endfor %}
                     </div>
+
+                    <!-- Rating Update Form -->
+                    <form action="{{ url_for('update_rating') }}" method="POST" class="mt-2">
+                        <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
+                        <div class="d-flex justify-content-center align-items-center text-center">
+                            <label for="rating-{{ movie.movie_id }}" class="mb-0 me-2" style="display: inline;">Update
+                                Rating:</label>
+                            <select name="rating" id="rating-{{ movie.movie_id }}" required
+                                    class="form-select form-select-sm w-auto">
+                                {% for i in range(0, 6) %}
+                                <option value="{{ i }}" {% if movie.rating== i %}selected{% endif %}>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-primary ms-2">Update</button>
+                        </div>
+                    </form>
+
+
+                    {% endif %}
+
+
                 </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
     </div>
-
 </div>
-
-
 {% endblock %}
