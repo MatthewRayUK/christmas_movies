@@ -6,10 +6,13 @@ from wtforms import StringField, SubmitField, URLField, TimeField, SelectField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import declarative_base, Mapped
-from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, text
+from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, text, Boolean
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
+
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -34,7 +37,6 @@ class Base(DeclarativeBase):
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///christmas_movies.db'
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
-
 
 
 # Create a User table for all your registered users
@@ -67,6 +69,12 @@ class Watchlist(db.Model):
     image_url: Mapped[str] = mapped_column(Text, nullable=False)
     title: Mapped[str] = mapped_column(Text, nullable=False)
     user_rating: Mapped[int] = mapped_column(Integer, nullable=True)
+    is_netflix: Mapped[int] = mapped_column(Integer, nullable=True, default=0)
+    is_disney: Mapped[int] = mapped_column(Integer, nullable=True, default=0)
+    is_prime: Mapped[int] = mapped_column(Integer, nullable=True, default=0)
+    is_nowtv: Mapped[int] = mapped_column(Integer, nullable=True, default=0)
+    is_apple: Mapped[int] = mapped_column(Integer, nullable=True, default=0)
+
 
     # Relationships to User and Movie
     user = relationship("User", back_populates="watchlist")
@@ -86,15 +94,20 @@ class pack_builder_search(FlaskForm):
     category = SelectField('Category', choices=[('', 'Click here to select a category'), ('starter', 'Starter'), ('90s', '90s')])
     submit = SubmitField('Submit')
 
+
 @app.route('/', methods=["GET", "POST"])
 def home():
     form = builder_search()
     if current_user.is_authenticated:
         user = current_user  # Get the currently logged-in user
-        movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title, Watchlist.user_rating).filter(
+
+
+        movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title, Watchlist.user_rating, Watchlist.is_netflix, Watchlist.is_apple, Watchlist.is_nowtv, Watchlist.is_prime, Watchlist.is_disney).filter(
             Watchlist.user_id == current_user.id).all()
-        movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title, "rating": user_rating} for movie_id, image_url, title, user_rating in
+
+        movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title, "rating": user_rating, "is_netflix": is_netflix, "is_apple": is_apple, "is_nowtv": is_nowtv, "is_prime": is_prime, "is_disney": is_disney} for movie_id, image_url, title, user_rating, is_netflix, is_apple, is_nowtv, is_prime, is_disney in
                       movies]
+
         count= len(movie_data)
         return render_template("index.html", form=form, user=user, database=movie_data, count=count)
     else:
@@ -136,16 +149,20 @@ def update_rating():
 
 @app.route('/starter')
 def starter():
-    movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
+    movies = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title, Watchlist.user_rating, Watchlist.is_netflix, Watchlist.is_apple, Watchlist.is_nowtv, Watchlist.is_prime, Watchlist.is_disney).filter(
             Watchlist.category == 'starter').all()
     user_watchlist = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
             Watchlist.user_id == current_user.id).all()
     user_watchlist_ids = [movie.movie_id for movie in user_watchlist]
 
-    movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title} for movie_id, image_url, title in movies]
+    movie_data = [{"movie_id": movie_id, "image_url": image_url, "title": title, "rating": user_rating, "is_netflix": is_netflix, "is_apple": is_apple, "is_nowtv": is_nowtv, "is_prime": is_prime, "is_disney": is_disney} for movie_id, image_url, title, user_rating, is_netflix, is_apple, is_nowtv, is_prime, is_disney in movies]
     return render_template("starter.html", database=movie_data, user_watchlist=user_watchlist_ids)
 
-
+@app.route('/remove_movie', methods=["POST"])
+def remove_movie():
+    movie_id = request.form['movie_id']
+    print(movie_id)
+    return redirect(url_for('home'))
 
 @app.route ('/user_search',methods=["GET", "POST"])
 def user_search():
@@ -225,7 +242,6 @@ def logout():
 
 @app.route('/add_movie/<int:movie_id>')
 def add_movie(movie_id):
-    print(movie_id)
     add_to_watchlist(current_user.id, movie_id)
     return redirect(url_for('home'))
 
@@ -270,7 +286,53 @@ def add_to_watchlist(user_id, movie_id, *category):
     title = response.json().get('original_title')
     image_url = response.json().get('poster_path')
 
-    watchlist_entry = Watchlist(user_id=user_id, movie_id=movie_id, category=category, image_url = image_url, title=title, user_rating=0)
+    """
+    START Platform search
+    """
+    region = 'GB'  # Replace with the desired region code (e.g., US for the United States)
+
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={api_key}&region=GB"
+
+    headers = {
+        "accept": "application/json",
+        "Authorization": "b6f038e5338cf8fbc1f28e2caf556c96"  # Replace with your valid API key
+    }
+
+    response = requests.get(url, headers=headers)
+
+    data = response.json()
+
+    if 'results' in data:
+        providers = data['results']['GB']
+
+        is_netflix = 0
+        is_disney = 0
+        is_prime = 0
+        is_apple = 0
+        is_sky = 0
+        is_nowtv = 0
+
+        if 'flatrate' in providers:
+            for provider in providers['flatrate']:
+                provider_name = provider.get('provider_name', '').lower()
+                if 'netflix' in provider_name:
+                    is_netflix = 1
+                elif 'disney' in provider_name:
+                    is_disney = 1
+                elif 'prime' in provider_name:
+                    is_prime = 1
+                elif 'apple' in provider_name:
+                    is_apple = 1
+                elif 'sky' in provider_name:
+                    is_sky = 1
+                elif 'now' in provider_name:
+                    is_nowtv = 1
+            print(is_netflix, is_disney, is_prime, is_apple, is_sky, is_nowtv)
+
+    """
+    END Platform search
+    """
+    watchlist_entry = Watchlist(user_id=user_id, movie_id=movie_id, category=category, image_url = image_url, title=title, user_rating=0, is_netflix=is_netflix, is_apple=is_apple, is_disney=is_disney,is_nowtv=is_nowtv, is_prime=is_prime)
     db.session.add(watchlist_entry)
     db.session.commit()
 
@@ -279,6 +341,72 @@ def add_to_watchlist(user_id, movie_id, *category):
 #         # Execute raw SQL to add the 'title' column
 #         db.session.execute(text('ALTER TABLE watchlist ADD COLUMN user_rating INTEGER;'))
 #         db.session.commit()
+
+
+def update_streaming_platforms():
+    # Ensure we're within the Flask app context
+    with app.app_context():
+        # Iterate over each movie in the watchlist
+        watchlist_entries = Watchlist.query.all()
+
+        for entry in watchlist_entries:
+            movie_id = entry.movie_id  # Get the movie_id from the watchlist
+            # Fetch streaming providers from Movie DB API
+            url = f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={api_key}"
+
+            headers = {
+                "accept": "application/json",
+                "Authorization": "b6f038e5338cf8fbc1f28e2caf556c96"  # Replace with your valid API key
+            }
+
+            response = requests.get(url, headers=headers)
+            data = response.json()
+
+            # Print the full API response to inspect it
+            print(f"API Response for movie_id {movie_id}: {data}")
+
+            # Check for streaming platforms in the response
+            if 'results' in data:
+                if 'GB' in data['results']:
+                    providers = data['results']['GB']
+                    print(f"Providers for movie_id {movie_id}: {providers}")
+
+                    # Initialize flags as 0
+                    entry.is_netflix = 0
+                    entry.is_disney = 0
+                    entry.is_prime = 0
+                    entry.is_apple = 0
+                    entry.is_sky = 0
+                    entry.is_nowtv = 0
+
+                    # Check only 'flatrate' providers
+                    if 'flatrate' in providers:
+                        for provider in providers['flatrate']:
+                            provider_name = provider.get('provider_name', '').lower()
+                            if 'netflix' in provider_name:
+                                entry.is_netflix = 1
+                            elif 'disney' in provider_name:
+                                entry.is_disney = 1
+                            elif 'prime' in provider_name:
+                                entry.is_prime = 1
+                            elif 'apple' in provider_name:
+                                entry.is_apple = 1
+                            elif 'sky' in provider_name:
+                                entry.is_sky = 1
+                            elif 'now' in provider_name:
+                                entry.is_nowtv = 1
+
+                    # Commit the changes to the database
+                    db.session.commit()
+                else:
+                    print(f"No data found for 'GB' in the response for movie_id {movie_id}")
+            else:
+                print(f"No 'results' key in API response for movie_id {movie_id}")
+
+
+# Call the function to update the watchlist
+# update_streaming_platforms()
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
