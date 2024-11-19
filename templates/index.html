@@ -37,34 +37,66 @@
     <div class="row">
         {% for movie in database %}
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-            <div class="card border-info" style="display: flex; flex-direction: column; height: 100%;">
+            <div class="card border-secondary" style="display: flex; flex-direction: column; height: 100%;">
                 <div class="card-body" style="padding: 0.5rem; text-align: center;">
                     <!-- Movie Title -->
-                    <h3 class="card-title mt-2" style="font-size: 1.25rem;">
+                    <h3 class="card-title mt-2 text-center"
+                        style="font-size: 1.25rem; height: 1.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                        title="{{ movie.title }}">
                         {{ loop.index }} | {{ movie.title }}
                     </h3>
 
+
+                    {% set active_opacity = 1 %}
+                    {% set inactive_opacity = 0.125 %}
+                    <img src="static/icons/netflix.png"
+                         style="width: 40px; opacity: {{ active_opacity if movie.is_netflix == 1 else inactive_opacity }};"
+                         class="py-1">
+
+                    <img src="static/icons/prime.png"
+                         style="width: 40px; opacity: {{ active_opacity if movie.is_prime == 1 else inactive_opacity }};"
+                         class="py-1">
+
+                    <img src="static/icons/nowtv.png"
+                         style="width: 40px; opacity: {{ active_opacity if movie.is_nowtv == 1 else inactive_opacity }};"
+                         class="py-1">
+
+                    <img src="static/icons/disney.png"
+                         style="width: 40px; opacity: {{ active_opacity if movie.is_disney == 1 else inactive_opacity }};"
+                         class="py-1">
+
+                    <img src="static/icons/apple.png"
+                         style="width: 40px; opacity: {{ active_opacity if movie.is_apple == 1 else inactive_opacity }};"
+                         class="py-1">
+
+
                     <!-- Movie Image -->
                     <img src="https://image.tmdb.org/t/p/original{{ movie.image_url }}" alt="Movie Image"
-                         class="img-fluid" style="width: 45%; margin: auto;">
-
-
+                         class="img-fluid py-1" style="width: 45%; margin: auto;">
+                    <br>
+                    <form action="{{ url_for('remove_movie') }}" method="POST">
+                        <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Remove</button>
+                    </form>
+                    <hr>
                     {% if movie.rating ==0 %}
-                    <p class="text-danger">◆ Not Rated ◆</p>
+                    <p class="text-success">◆ Not Rated ◆</p>
                     <form action="{{ url_for('update_rating') }}" method="POST" class="mt-2">
                         <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
                         <div class="d-flex justify-content-center align-items-center text-center">
-                            <label for="rating-{{ movie.movie_id }}" class="mb-0 me-2" style="display: inline;">
+                            <label for="rating-{{ movie.movie_id }}" class="mb-0 me-2 text-success"
+                                   style="display: inline;">
                                 Add Rating:</label>
-                           <select name="rating" id="rating-{{ movie.movie_id }}" required class="form-select form-select-sm w-auto">
-    {% for i in range(1, 6) %}
-        <option value="{{ i }}"
-            {% if movie.rating == 0 and i == 5 or movie.rating == i %}selected{% endif %}>
-            {{ i }}
-        </option>
-    {% endfor %}
-</select>
-                            <button type="submit" class="btn btn-sm btn-danger ms-2">Add Rating</button>
+                            <select name="rating" id="rating-{{ movie.movie_id }}" required
+                                    class="form-select form-select-sm w-auto text-success">
+                                {% for i in range(1, 6) %}
+                                <option value="{{ i }}"
+                                        {% if movie.rating== 0 and i== 5 or movie.rating== i %}selected{% endif %}>
+                                    {{ i }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-success ms-2">Add Rating</button>
                         </div>
                     </form>
                     {% else %}
@@ -82,15 +114,16 @@
                     <form action="{{ url_for('update_rating') }}" method="POST" class="mt-2">
                         <input type="hidden" name="movie_id" value="{{ movie.movie_id }}">
                         <div class="d-flex justify-content-center align-items-center text-center">
-                            <label for="rating-{{ movie.movie_id }}" class="mb-0 me-2" style="display: inline;">Update
+                            <label for="rating-{{ movie.movie_id }}" class="mb-0 me-2 text-danger"
+                                   style="display: inline;">Update
                                 Rating:</label>
                             <select name="rating" id="rating-{{ movie.movie_id }}" required
-                                    class="form-select form-select-sm w-auto">
+                                    class="form-select form-select-sm w-auto text-danger">
                                 {% for i in range(0, 6) %}
                                 <option value="{{ i }}" {% if movie.rating== i %}selected{% endif %}>{{ i }}</option>
                                 {% endfor %}
                             </select>
-                            <button type="submit" class="btn btn-sm btn-primary ms-2">Update</button>
+                            <button type="submit" class="btn btn-sm btn-danger ms-2">Update</button>
                         </div>
                     </form>
 
@@ -99,8 +132,11 @@
 
 
                 </div>
+
             </div>
+
         </div>
+
         {% endfor %}
     </div>
 </div>
