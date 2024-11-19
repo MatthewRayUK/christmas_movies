@@ -161,7 +161,13 @@ def starter():
 @app.route('/remove_movie', methods=["POST"])
 def remove_movie():
     movie_id = request.form['movie_id']
-    print(movie_id)
+    user_id = current_user.id
+    print(movie_id, user_id)
+    watchlist_entry = Watchlist.query.filter_by(movie_id=movie_id, user_id=user_id).first()
+
+    if watchlist_entry:
+        db.session.delete(watchlist_entry)  # Delete the record
+        db.session.commit()  # Commit the transaction
     return redirect(url_for('home'))
 
 @app.route ('/user_search',methods=["GET", "POST"])
