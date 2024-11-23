@@ -1,1 +1,6 @@
+<<<<<<< HEAD
 instance/christmas_movies.db
+=======
+instance/*.db
+test*.py
+>>>>>>> 5252c929045c1f6b574bcf34fe5e60e1ab37b063
