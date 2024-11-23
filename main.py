@@ -188,8 +188,11 @@ def user_search_results():
     # data = response.json()
 
     data = api_movie(search)
+    user_watchlist = db.session.query(Watchlist.movie_id, Watchlist.image_url, Watchlist.title).filter(
+        Watchlist.user_id == current_user.id).all()
+    user_watchlist_ids = [movie.movie_id for movie in user_watchlist]
 
-    return render_template('user_search_results.html', data=data)
+    return render_template('user_search_results.html', data=data, user_watchlist = user_watchlist_ids)
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
