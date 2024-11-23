@@ -42,7 +42,7 @@
 
                 <div class="mt-auto">
                     {% if movie.movie_id in user_watchlist %}
-                    <a type="button" class="btn btn-success my-2">✓ Already in Watchlist</a>
+                    <a type="button" class="btn btn-success my-2">✓ Already in list</a>
                     {% else %}
                     <a href="{{ url_for('add_movie', movie_id=movie.movie_id) }}">
                         <button type="button" class="btn btn-outline-secondary my-2">Select Movie</button>
