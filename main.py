@@ -183,9 +183,11 @@ def user_search():
 @app.route ('/user_search_results',methods=["GET", "POST"])
 def user_search_results():
     search = request.args.get('data')
-    url = f"https://api.themoviedb.org/3/search/movie?query={search}&api_key={api_key}"
-    response = requests.get(url)
-    data = response.json()
+    # url = f"https://api.themoviedb.org/3/search/movie?query={search}&api_key={api_key}"
+    # response = requests.get(url)
+    # data = response.json()
+
+    data = api_movie(search)
 
     return render_template('user_search_results.html', data=data)
 
@@ -295,24 +297,26 @@ def api_movie(search):
             movie_id = movie['id']
             title = movie['original_title']
             img_url = movie['poster_path']
+
+
+
+
             # Providers
             providers_url = f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={api_key}"
             providers_response = requests.get(providers_url)
             providers_data = providers_response.json()
 
-            try:
+            if 'GB' in providers_data['results']:
                 providers = providers_data['results']['GB']
 
-                is_netflix = 0
-                is_disney = 0
-                is_prime = 0
-                is_apple = 0
-                is_sky = 0
-                is_nowtv = 0
-            except:
-                pass
-                try:
-
+                print(providers)
+                if 'flatrate' in providers:
+                    print('start')
+                    is_netflix = 0
+                    is_disney = 0
+                    is_prime = 0
+                    is_apple = 0
+                    is_nowtv = 0
                     for provider in providers['flatrate']:
                         provider_name = provider.get('provider_name', '').lower()
                         if 'netflix' in provider_name:
@@ -323,22 +327,32 @@ def api_movie(search):
                             is_prime = 1
                         elif 'apple' in provider_name:
                             is_apple = 1
-                        elif 'sky' in provider_name:
-                            is_sky = 1
                         elif 'now' in provider_name:
                             is_nowtv = 1
-                except:
-                    pass
-            movie_details.append ({
-                'movie_id': movie_id,
-                'title': title,
-                'img_url': img_url,
-                'is_netlix': is_netflix,
-                'is_disney': is_disney,
-                'is_prime': is_prime,
-                'is_apple': is_apple,
-                'is_now': is_nowtv,
-            })
+
+                    print(movie_id, title, is_netflix)
+                    movie_details.append ({
+                        'movie_id': movie_id,
+                        'title': title,
+                        'img_url': img_url,
+                        'is_netflix': is_netflix,
+                        'is_disney': is_disney,
+                        'is_prime': is_prime,
+                        'is_apple': is_apple,
+                        'is_now': is_nowtv,
+                    })
+                else:
+                    movie_details.append({
+                        'movie_id': movie_id,
+                        'title': title,
+                        'img_url': img_url,
+                        'is_netflix': 0,
+                        'is_disney': 0,
+                        'is_prime': 0,
+                        'is_apple': 0,
+                        'is_now': 0,
+                    })
+
     return movie_details
 
 

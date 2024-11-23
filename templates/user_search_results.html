@@ -4,7 +4,8 @@
     <h2 class="text-center pt-3 text-success">Search Results</h2>
 
     <div class="row">
-        {% for x in data["results"] %}
+        {% for x in data %}
+
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card border-secondary h-100 d-flex flex-column">
                 <!-- Card Body -->
@@ -34,8 +35,8 @@
                     </div>
 
                     <!-- Movie Poster -->
-                    {% if x['poster_path'] %}
-                    <img src="https://image.tmdb.org/t/p/original{{ x['poster_path'] }}"
+                    {% if x['img_url'] %}
+                    <img src="https://image.tmdb.org/t/p/original{{ x['img_url'] }}"
                          alt="{{ x['original_title']|e }} Poster"
                          class="img-fluid my-2"
                          style="max-width: 45%; height: auto;">
@@ -46,7 +47,7 @@
 
                 <!-- Card Footer -->
                 <div class="mt-auto text-center pb-3">
-                    <a href="{{ url_for('add_movie', movie_id=x['id']) }}" class="btn btn-sm btn-outline-secondary ms-2">
+                    <a href="{{ url_for('add_movie', movie_id=x['movie_id']) }}" class="btn btn-sm btn-outline-secondary ms-2">
                         Select Movie
                     </a>
                 </div>
