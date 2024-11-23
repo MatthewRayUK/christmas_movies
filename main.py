@@ -281,6 +281,68 @@ def admin_add(movie_id):
 
     return redirect(url_for('packbuilder'))
 
+
+
+def api_movie(search):
+    url = f"https://api.themoviedb.org/3/search/movie?query={search}&api_key={api_key}"
+    response = requests.get(url)
+    data = response.json()
+    movie_list = data['results']
+    movie_details = []
+
+    provider_details = []
+    for movie in movie_list:
+            movie_id = movie['id']
+            title = movie['original_title']
+            img_url = movie['poster_path']
+            # Providers
+            providers_url = f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={api_key}"
+            providers_response = requests.get(providers_url)
+            providers_data = providers_response.json()
+
+            try:
+                providers = providers_data['results']['GB']
+
+                is_netflix = 0
+                is_disney = 0
+                is_prime = 0
+                is_apple = 0
+                is_sky = 0
+                is_nowtv = 0
+            except:
+                pass
+                try:
+
+                    for provider in providers['flatrate']:
+                        provider_name = provider.get('provider_name', '').lower()
+                        if 'netflix' in provider_name:
+                            is_netflix = 1
+                        elif 'disney' in provider_name:
+                            is_disney = 1
+                        elif 'prime' in provider_name:
+                            is_prime = 1
+                        elif 'apple' in provider_name:
+                            is_apple = 1
+                        elif 'sky' in provider_name:
+                            is_sky = 1
+                        elif 'now' in provider_name:
+                            is_nowtv = 1
+                except:
+                    pass
+            movie_details.append ({
+                'movie_id': movie_id,
+                'title': title,
+                'img_url': img_url,
+                'is_netlix': is_netflix,
+                'is_disney': is_disney,
+                'is_prime': is_prime,
+                'is_apple': is_apple,
+                'is_now': is_nowtv,
+            })
+    return movie_details
+
+
+
 def add_to_watchlist(user_id, movie_id, *category):
 
     if user_id == 1:
@@ -410,8 +472,7 @@ def update_streaming_platforms():
                 print(f"No 'results' key in API response for movie_id {movie_id}")
 
 
-# Call the function to update the watchlist
-# update_streaming_platforms()
+
 
 
 if __name__ == "__main__":
