@@ -124,15 +124,15 @@ def about():
 def update_rating():
     movie_id = request.form.get('movie_id')
     new_rating = request.form.get('rating')
-    print(f"M:{movie_id}  NR:{new_rating}")
+    # print(f"M:{movie_id}  NR:{new_rating}")
 
     if movie_id and new_rating:
-        print("part 1")
+        # print("part 1")
         # Find the existing Watchlist entry for the current user and movie
         watchlist_entry = Watchlist.query.filter_by(user_id=current_user.id, movie_id=movie_id).first()
 
         if watchlist_entry:
-            print("part 2")
+            # print("part 2")
             # Update the user rating for the movie
             watchlist_entry.user_rating = int(new_rating)  # Set the new rating here
 
@@ -162,7 +162,7 @@ def starter():
 def remove_movie():
     movie_id = request.form['movie_id']
     user_id = current_user.id
-    print(movie_id, user_id)
+    # print(movie_id, user_id)
     watchlist_entry = Watchlist.query.filter_by(movie_id=movie_id, user_id=user_id).first()
 
     if watchlist_entry:
@@ -175,7 +175,7 @@ def user_search():
     form = builder_search()
     if form.validate_on_submit():
         results = form.search.data
-        print(results)
+        # print(results)
         return redirect(url_for("user_search_results", data=results))
     return render_template('user_search.html', form=form)
 
@@ -272,17 +272,23 @@ def pack_builder_results():
     search = request.args.get('data')
     category = request.args.get('category')
 
-    url = f"https://api.themoviedb.org/3/search/movie?query={search}&api_key={api_key}"
+    url = f"https://api.themoviedb.org/3/search/movie?query={search}&api_key={api_key}&region=GB"
     response = requests.get(url)
     data = response.json()
 
-
     return render_template('packbuilder_results.html', data=data, category=category)
 
-@app.route('/admin_add/<int:movie_id>')
+@app.route("/admin_add/<int:movie_id>", methods=['GET', 'POST'])
 def admin_add(movie_id):
     user_id = current_user.id  # or use your method of getting the current user's ID
-    add_to_watchlist(user_id, movie_id)
+    # category =
+    if request.method == 'POST':
+        # Retrieve the selected category from the form data
+        category = request.form.get('category')  # 'category' is the name attribute of the dropdown
+
+        # Now you can use the category and movie_id in your logic
+        print(f"Movie ID: {movie_id}, Category: {category}")
+        add_to_watchlist(user_id, movie_id, category)
 
     return redirect(url_for('packbuilder'))
 
@@ -312,9 +318,9 @@ def api_movie(search):
             if 'GB' in providers_data['results']:
                 providers = providers_data['results']['GB']
 
-                print(providers)
+                # print(providers)
                 if 'flatrate' in providers:
-                    print('start')
+                    # print('start')
                     is_netflix = 0
                     is_disney = 0
                     is_prime = 0
@@ -333,7 +339,7 @@ def api_movie(search):
                         elif 'now' in provider_name:
                             is_nowtv = 1
 
-                    print(movie_id, title, is_netflix)
+                    # print(movie_id, title, is_netflix)
                     movie_details.append ({
                         'movie_id': movie_id,
                         'title': title,
@@ -342,7 +348,7 @@ def api_movie(search):
                         'is_disney': is_disney,
                         'is_prime': is_prime,
                         'is_apple': is_apple,
-                        'is_now': is_nowtv,
+                        'is_nowtv': is_nowtv,
                     })
                 else:
                     movie_details.append({
@@ -363,7 +369,7 @@ def api_movie(search):
 def add_to_watchlist(user_id, movie_id, *category):
 
     if user_id == 1:
-        category = 'starter'
+        category = category[0] if category else None
     else:
         category = 'user'
 
@@ -412,7 +418,7 @@ def add_to_watchlist(user_id, movie_id, *category):
                     is_sky = 1
                 elif 'now' in provider_name:
                     is_nowtv = 1
-            print(is_netflix, is_disney, is_prime, is_apple, is_sky, is_nowtv)
+            # print(is_netflix, is_disney, is_prime, is_apple, is_sky, is_nowtv)
 
     """
     END Platform search
@@ -448,13 +454,13 @@ def update_streaming_platforms():
             data = response.json()
 
             # Print the full API response to inspect it
-            print(f"API Response for movie_id {movie_id}: {data}")
+            # print(f"API Response for movie_id {movie_id}: {data}")
 
             # Check for streaming platforms in the response
             if 'results' in data:
                 if 'GB' in data['results']:
                     providers = data['results']['GB']
-                    print(f"Providers for movie_id {movie_id}: {providers}")
+                    # print(f"Providers for movie_id {movie_id}: {providers}")
 
                     # Initialize flags as 0
                     entry.is_netflix = 0
