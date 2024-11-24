@@ -361,6 +361,18 @@ def api_movie(search):
                         'is_apple': 0,
                         'is_now': 0,
                     })
+            else:
+                movie_details.append({
+                    'movie_id': movie_id,
+                    'title': title,
+                    'img_url': img_url,
+                    'is_netflix': 0,
+                    'is_disney': 0,
+                    'is_prime': 0,
+                    'is_apple': 0,
+                    'is_now': 0,
+                })
+
 
     return movie_details
 
