@@ -10,17 +10,16 @@ from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey, text, B
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
-
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+import os
+load_dotenv()
+api_key = os.getenv('API_KEY')
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.getenv('DATABASE_SECRET_KEY')
 
 Bootstrap(app)
 Base = declarative_base()
-
-api_key = "b6f038e5338cf8fbc1f28e2caf556c96"
 
 # Configure Flask-Login
 login_manager = LoginManager()
@@ -381,7 +380,7 @@ def api_movie(search):
 def add_to_watchlist(user_id, movie_id, *category):
 
     if user_id == 1:
-        category = category[0] if category else None
+        category = 'starter'
     else:
         category = 'user'
 
@@ -405,7 +404,7 @@ def add_to_watchlist(user_id, movie_id, *category):
 
     data = response.json()
 
-    if 'results' in data:
+    if 'GB' in data['results']:
         providers = data['results']['GB']
 
         is_netflix = 0
